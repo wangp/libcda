@@ -11,7 +11,7 @@
 #include "libcda.h"
 
 
-void show_cmds()
+void show_cmds(void)
 {
     printf("\nAvailable commands:\n");
     printf("? - help (this)\n");
@@ -128,7 +128,7 @@ int main()
 		trk = input_int("Track");
 		ret = cd_is_audio(trk);
 		if (ret < 0)
-		    printf("Error occurred\n");
+		     printf("Error occurred\n");
 		else
 		    printf("Track %d is %s\n", trk, (ret ? "audio" : "data"));
 		break;

@@ -3,6 +3,7 @@
  * Peter Wang <tjaden@psynet.net>
  */
 
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -11,12 +12,27 @@
 #include "libcda.h"
 
 
+/* It appears not all drivers support the CDROMPLAYTRKIND ioctl yet 
+ * (unfortunately).  Until then, we use CDROMPLAYMSF. 
+ */
+#define USE_PLAYMSF
+
+
 #define MIN(x,y)     (((x) < (y)) ? (x) : (y))
 #define MAX(x,y)     (((x) > (y)) ? (x) : (y))
 #define MID(x,y,z)   MAX((x), MIN((y), (z)))
 
 
 static int fd = -1;
+
+
+static int get_tocentry(int track, struct cdrom_tocentry *e)
+{
+    memset(e, 0, sizeof(struct cdrom_tocentry));
+    e->cdte_track = track;
+    e->cdte_format = CDROM_MSF;
+    return ioctl(fd, CDROMREADTOCENTRY, e);
+}
 
 
 static int get_subchnl(struct cdrom_subchnl *s)
@@ -40,7 +56,7 @@ int cd_init()
     if (fd != -1) close(fd);
 
     fd = open(device, O_RDONLY | O_NONBLOCK);
-    return fd ? 0 : -1;
+    return (fd == -1) ? -1 : 0;
 }
 
 
@@ -58,12 +74,41 @@ void cd_exit()
 
 static int play(int t1, int t2)
 {
+#ifdef USE_PLAYMSF
+    struct cdrom_tocentry e0, e1;
+    struct cdrom_msf msf;
+    int last;
+
+    if (cd_get_tracks(0, &last) != 0)
+	return -1;
+    
+    /* cdrom.h: The leadout track is always 0xAA, regardless 
+     * of # of tracks on disc. */
+    if (t2 == last)
+	t2 = CDROM_LEADOUT;
+    else
+	t2++;
+    
+    if ((get_tocentry(t1, &e0) != 0) ||
+	(get_tocentry(t2, &e1) != 0))
+	return -1;
+
+    msf.cdmsf_min0 = e0.cdte_addr.msf.minute;
+    msf.cdmsf_sec0 = e0.cdte_addr.msf.second;
+    msf.cdmsf_frame0 = e0.cdte_addr.msf.frame;
+    msf.cdmsf_min1 = e1.cdte_addr.msf.minute;
+    msf.cdmsf_sec1 = e1.cdte_addr.msf.second;
+    msf.cdmsf_frame1 = e1.cdte_addr.msf.frame;
+    
+    return ioctl(fd, CDROMPLAYMSF, &msf);
+#else
     struct cdrom_ti idx;
 
     memset(&idx, 0, sizeof(idx));
     idx.cdti_trk0 = t1;
     idx.cdti_trk1 = t2;
     return ioctl(fd, CDROMPLAYTRKIND, &idx);
+#endif
 }
 
 
@@ -86,15 +131,16 @@ int cd_play_range(int start, int end)
 
 
 /* cd_play_from:
- *  Play from track to end of disc.
- *  Return zero on success.
+ *  Play from track to end of disc.  Return zero on success.
  */
 int cd_play_from(int track)
 {
-    int t1, t2;
-    if ((cd_get_tracks(&t1, &t2) != 0) || (track > t2))
+    int last;
+    
+    if (cd_get_tracks(0, &last) != 0)
 	return -1;
-    return play(track, t2);
+    
+    return play(track, last);
 }
 
 
@@ -154,20 +200,20 @@ void cd_stop()
 
 
 /* cd_get_tracks:
- *  Get first and last tracks of CD.
- *  Return zero on success.
+ *  Get first and last tracks of CD.  Return zero on success.
  */
 int cd_get_tracks(int *first, int *last)
 {
     struct cdrom_tochdr toc;
 
     if (ioctl(fd, CDROMREADTOCHDR, &toc) < 0) {
-	*first = *last = 0;
+	if (first) *first = 0;
+	if (last) *last = 0;
 	return -1;
     }
 
-    *first = toc.cdth_trk0;
-    *last = toc.cdth_trk1;
+    if (first) *first = toc.cdth_trk0;
+    if (last) *last = toc.cdth_trk1;
     return 0;
 }
 
@@ -180,10 +226,7 @@ int cd_is_audio(int track)
 {
     struct cdrom_tocentry e;
     
-    memset(&e, 0, sizeof(e));
-    e.cdte_track = track;
-    e.cdte_format = CDROM_LBA;
-    if (ioctl(fd, CDROMREADTOCENTRY, &e) < 0)
+    if (get_tocentry(track, &e) < 0)
 	return -1;
     return (e.cdte_ctrl & CDROM_DATA_TRACK) ? 0 : 1;
 }

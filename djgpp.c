@@ -39,9 +39,9 @@ static int lowest_track, highest_track;
 static Track *tracks;
 
 static int dos_mem_segment, dos_mem_selector = -1;
-static int _status, _error, _error_code;
+static int status, error, error_code;
 
-#define RESET_ERROR (_error = _error_code = 0)
+#define RESETerror (error = error_code = 0)
 #define ERROR_BIT (1 << 15)
 #define BUSY_BIT (1 << 9)
 
@@ -147,19 +147,19 @@ static void _ioctl(IOCTLI * ioctli, void *command, int len)
     ioctli->len = len;
     dosmemput(ioctli, ioctli_len, __tb);	/* put ioctl into dos area */
     dosmemput(command, len, command_address);	/* and command too */
-    if (__dpmi_int(0x2f, &regs) == -1) 
+    if (__dpmi_int(0x2f, &regs) == -1)
 	return;
 
     dosmemget(__tb, ioctli_len, ioctli);	/* retrieve results */
     dosmemget(command_address, len, command);
-    _status = ioctli->request_header.status;
-    if (_status & ERROR_BIT) {
-	_error = TRUE;
-	_error_code = _status & 0xff;
+    status = ioctli->request_header.status;
+    if (status & ERROR_BIT) {
+	error = TRUE;
+	error_code = status & 0xff;
     }
     else {
-	_error = FALSE;
-	_error_code = 0;
+	error = FALSE;
+	error_code = 0;
     }
 }
 
@@ -179,7 +179,7 @@ static void _ioctl2(void *cmd, int len)
 
     /* I hate to have no error capability for ioctl2 but the command block
        doesn't necessarily have a status field */
-    RESET_ERROR;
+    RESETerror;
 }
 
 
@@ -196,7 +196,7 @@ static int red2hsg(char *r)
 #define BCD_DATA_READ_ONLY	16
 #define BCD_SUPPORT_INTERLEAVE	32
 
-static int _device_status()
+static int device_status()
 {
     IOCTLI ioctli;
     StatusRequest req;
@@ -213,7 +213,7 @@ static int _device_status()
 }
 
 
-static int _get_status_word()
+static int get_status_word()
 {
     IOCTLI ioctli;
     DiskInfo disk_info;
@@ -227,26 +227,26 @@ static int _get_status_word()
     ioctli.len = 7;
     disk_info.control = 10;
     _ioctl(&ioctli, &disk_info, sizeof disk_info);
-    return _status;
+    return status;
 }
 
 
 /* Internal: If the door is open, then the head is busy, and so the
  * busy bit is on. It is not, however, playing audio. */
-static int _audio_busy()
+static int audio_busy()
 {
-    if (_device_status() & BCD_DOOR_OPEN)
+    if (device_status() & BCD_DOOR_OPEN)
 	return 0;
 
-    _get_status_word();
-    if (_error)
+    get_status_word();
+    if (error)
 	return -1;
-    return (_status & BUSY_BIT) ? 1 : 0;
+    return (status & BUSY_BIT) ? 1 : 0;
 }
 
 
 /* Internal function to get current audio position */
-static int _audio_position()
+static int audio_position()
 {
     IOCTLI ioctli;
     PositionRequest req;
@@ -263,7 +263,7 @@ static int _audio_position()
 
 
 /* Internal function to get track info */
-static void _get_track_info(int n, Track *t)
+static void get_track_info(int n, Track *t)
 {
     IOCTLI ioctli;
     TrackInfo info;
@@ -282,7 +282,7 @@ static void _get_track_info(int n, Track *t)
 
 
 /* Internal function to get disc info */
-static int _get_audio_info()
+static int get_audio_info()
 {
     IOCTLI ioctli;
     DiskInfo disk_info;
@@ -301,7 +301,7 @@ static int _get_audio_info()
     ioctli.len = 7;
     disk_info.control = 10;
     _ioctl(&ioctli, &disk_info, sizeof disk_info);
-    if (_error)
+    if (error)
 	return 0;
 
     lowest_track = disk_info.lowest;
@@ -313,7 +313,7 @@ static int _get_audio_info()
 
     /* get track starts */
     for (i = lowest_track; i <= highest_track; i++)
-	_get_track_info(i, tracks + i);
+	get_track_info(i, tracks + i);
 
     /* figure out track ends */
     for (i = lowest_track; i < highest_track; i++)
@@ -333,7 +333,7 @@ int cd_init()
     __dpmi_regs regs;
 
     /* disk I/O wouldn't work anyway if you set sizeof tb this low, but... */
-    if (_go32_info_block.size_of_transfer_buffer < 4096) 
+    if (_go32_info_block.size_of_transfer_buffer < 4096)
 	return -1;
 
     /* check for mscdex */
@@ -341,7 +341,7 @@ int cd_init()
     regs.x.ax = 0x1500;
     regs.x.bx = 0x0;
     __dpmi_int(0x2f, &regs);
-    if (regs.x.bx == 0)
+    if (regs.x.bx == 0) /* abba no longer lives */
 	return -1;
 
     first_drive = regs.x.cx;	/* use the first drive */
@@ -350,11 +350,11 @@ int cd_init()
     memset(&regs, 0, sizeof regs);
     regs.x.ax = 0x150C;
     __dpmi_int(0x2f, &regs);
-    if (regs.x.bx == 0) 
+    if (regs.x.bx == 0)
 	return -1;
 
     /* allocate 256 bytes of dos memory for the command blocks */
-    if ((dos_mem_segment = __dpmi_allocate_dos_memory(16, &dos_mem_selector)) < 0) 
+    if ((dos_mem_segment = __dpmi_allocate_dos_memory(16, &dos_mem_selector)) < 0)
 	return -1;
 
     return 0;
@@ -387,7 +387,7 @@ int cd_reset()
     ioctli.request_header.command = 12;
     ioctli.len = 1;
     _ioctl(&ioctli, &reset, sizeof reset);
-    if (_error)
+    if (error)
 	return 0;
     return 1;
 }
@@ -397,7 +397,7 @@ int cd_reset()
 /* Get first and last track numbers. */
 int cd_get_tracks(int *first, int *last)
 {
-    if (!_get_audio_info())
+    if (!get_audio_info())
 	return -1;
 
     *first = lowest_track;
@@ -409,7 +409,7 @@ int cd_get_tracks(int *first, int *last)
 /* Return non-zero is track contains audio. */
 int cd_is_audio(int trackno)
 {
-    if (!_get_audio_info() ||
+    if (!get_audio_info() ||
 	(trackno < lowest_track || trackno > highest_track))
 	return -1;
 
@@ -460,11 +460,11 @@ void cd_set_volume(int c0, int c1)
 
 
 /* Internal: low-level play function */
-static int _play(int location, int frames)
+static int play(int location, int frames)
 {
     PlayRequest cmd;
 
-    if (_audio_busy())
+    if (audio_busy())
 	cd_stop();
 
     memset(&cmd, 0, sizeof cmd);
@@ -474,19 +474,19 @@ static int _play(int location, int frames)
     cmd.len = frames;
     _ioctl2(&cmd, sizeof cmd);
 
-    return _error ? -1 : 0;
+    return error ? -1 : 0;
 }
 
 
 /* Play a single track. */
 int cd_play(int trackno)
 {
-    if ((!_get_audio_info()) ||
+    if ((!get_audio_info()) ||
 	(trackno < lowest_track || trackno > highest_track) ||
 	(!tracks[trackno].is_audio))
 	return -1;
-
-    return _play(tracks[trackno].start, tracks[trackno].len);
+    
+    return play(tracks[trackno].start, tracks[trackno].len);
 }
 
 
@@ -495,9 +495,9 @@ int cd_play_range(int start, int end)
 {
     int i, len = 0;
 
-    if ((!_get_audio_info()) ||
+    if ((!get_audio_info()) ||
 	(MIN(start, end) < lowest_track || 
-	 MAX(start, end) > highest_track))
+	 MAX(start, end) > highest_track)) 
 	return -1;
 
     for (i = start; i <= end; i++) {
@@ -506,14 +506,14 @@ int cd_play_range(int start, int end)
 	len += tracks[i].len;
     }
 
-    return _play(tracks[start].start, len);
+    return play(tracks[start].start, len);
 }
 
 
 /* Play from track to end of disc. */
 int cd_play_from(int track)
 {
-    if (!_get_audio_info())
+    if (!get_audio_info())
 	return -1;
 
     return cd_play_range(track, highest_track);
@@ -525,11 +525,11 @@ int cd_current_track()
 {
     int i, loc;
     
-    if ((!_audio_busy()) ||
-	(tracks == NULL && !_get_audio_info()))
+    if ((!audio_busy()) ||
+	(tracks == NULL && !get_audio_info()))
 	return 0;
 
-    loc = _audio_position();
+    loc = audio_position();
     for (i = lowest_track; i <= highest_track; i++) 
 	if (loc >= tracks[i].start && loc <= tracks[i].end)
 	    return i;
@@ -541,7 +541,7 @@ int cd_current_track()
 
 /* Internal: audio stop request.
  * Call once for Pause, twice for Stop. */
-static void _stop()
+static void stop()
 {
     StopRequest cmd;
 
@@ -555,7 +555,8 @@ static void _stop()
 /* Pause playback. */
 void cd_pause()
 {
-    if (!cd_is_paused()) _stop();
+    if (!cd_is_paused()) 
+	stop();
 }
 
 
@@ -592,8 +593,8 @@ int cd_is_paused()
 /* Stop playback. */
 void cd_stop()
 {
-    _stop();	/* This is not a hack. */
-    _stop();
+    stop();	/* This is not a hack. */
+    stop();
 }
 
 

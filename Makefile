@@ -6,10 +6,19 @@ ifdef DJDIR
 	# djgpp.
 	OBJS = djgpp.o
 	EXE = .exe
+	LIBS =
+else
+ifdef windir			# (ugh)
+	# mingw32.
+	OBJS = windows.o
+	EXE = .exe
+	LIBS = -lwinmm
 else
 	# Assume Linux.
 	OBJS = linux.o
 	EXE = 
+	LIBS =
+endif
 endif
 
 LIBCDA = libcda.a
@@ -21,7 +30,7 @@ $(LIBCDA): $(OBJS)
 	$(AR) rs $@ $^
 
 $(EXAMPLE): example.o $(LIBCDA)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(LIBS)
 
 clean:
 	rm -f $(LIBCDA) $(OBJS) 
