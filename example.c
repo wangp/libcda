@@ -4,7 +4,7 @@
  * The contents have been coded to be self-explanatory.
  * If they are not, please email me.
  *
- * Peter Wang <tjaden@psynet.net>
+ * Peter Wang <tjaden@users.sf.net>
  */
 
 #include <stdio.h>

@@ -3,7 +3,7 @@
  * Quick port of some old freeware code I found by Barry Egerter
  * (barry.egerter@softnet.com), with our API hacked over the top.
  *
- * Peter Wang <tjaden@psynet.net> 
+ * Peter Wang <tjaden@users.sf.net> 
  */
 
 #include <dos.h>

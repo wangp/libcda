@@ -1,6 +1,6 @@
 /* libcda; Linux component.
  *
- * Peter Wang <tjaden@psynet.net>
+ * Peter Wang <tjaden@users.sf.net>
  */
 
 #include <string.h>

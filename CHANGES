@@ -35,3 +35,8 @@ April 2001
 
 17	api: forgot to increment version number in header
 	--> rereleased version 0.5
+
+February 2002
+
+26	changed the licence to zlib/swapware
+	--> rerereleased version 0.5

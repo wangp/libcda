@@ -2,7 +2,7 @@
  *
  * Partly based on CDButton sample, by Pavel Cisler.
  * 
- * Peter Wang <tjaden@psynet.net> 
+ * Peter Wang <tjaden@users.sf.net> 
  */
 
 #include <Entry.h>

@@ -1,6 +1,6 @@
 /* This file is part of libcda.  See COPYING for licence.
  *
- * Peter Wang <tjaden@psynet.net>
+ * Peter Wang <tjaden@users.sf.net>
  */
 
 #ifndef __included_libcda_h

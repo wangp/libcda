@@ -3,7 +3,7 @@
  * Warped from bcd.c -- Brennan's CD-ROM Audio Playing Library, by
  * Brennan Underwood (v1.3).  Has been melded to.
  *
- * Peter Wang <tjaden@psynet.net> 
+ * Peter Wang <tjaden@users.sf.net> 
  */
 
 #include <dos.h>
