@@ -3,7 +3,7 @@
  * Minimalistic command line CD player using libcda.  Written for Linux
  * systems, but should work on others with a little help.
  *
- * Peter Wang <tjaden@psynet.net>
+ * Peter Wang <tjaden@users.sourceforge.net>
  */
 
 
@@ -11,10 +11,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include <libcda.h>
 
 
-#define VERSION    "cda -- Copyright 2000 Peter Wang (tjaden@psynet.net)"
+#define VERSION    "cda -- Copyright 2000, 2002 Peter Wang (tjaden@users.sourceforge.net)"
 
 
 static void fatal (const char *fmt, ...)
@@ -49,17 +50,18 @@ static void show_usage ()
     printf (VERSION "\n"
 	    "Interface pinched from dcd by dave@technopagan.org\n"
 	    "Usage: cda [command | tracks]\n"
-	    "\t d   dir      lists the CD directory\n"
-	    "\t e   eject    opens the CD tray\n"
-	    "\t c   close    closes the CD tray\n"
-	    "\t h   help     displays this message\n"
-	    "\t i   info     minimal info on the current CD\n"
-	    "\t p   pause    pause/resume the CD\n"
-	    "\t s   stop     stops the CD player\n"
-	    "\t v   version  displays the software revision/patchlevel\n"
-	    "\t f   forward  play the next track on CD\n"
-	    "\t b   back     play the previous track on CD\n"
-	    "\t r   random   plays random track from the CD\n");
+	    "\t d   dir         lists the CD directory\n"
+	    "\t e   eject       opens the CD tray\n"
+	    "\t c   close       closes the CD tray\n"
+	    "\t h   help        displays this message\n"
+	    "\t i   info        minimal info on the current CD\n"
+	    "\t p   pause       pause/resume the CD\n"
+	    "\t s   stop        stops the CD player\n"
+	    "\t v   version     displays the software revision/patchlevel\n"
+	    "\t f   forward     play the next track on CD\n"
+	    "\t b   back        play the previous track on CD\n"
+	    "\t r   random      play random track from the CD\n"
+	    "\t B   background  run in background and play random tracks\n");
 }
 
 
@@ -156,7 +158,7 @@ static void back_track ()
 }
 
 
-static void random_track ()
+static void random_track (int one_only)
 {
     int i;
     
@@ -173,9 +175,22 @@ static void random_track ()
     
     while (1) 
 	if (cd_is_audio ((i = (rand () % (t1 + 1 - t0)) + t0))) {
-	    cd_play_from (i);
+	    if (one_only)
+		cd_play (i);
+	    else
+		cd_play_from (i);
 	    break;
 	}
+}
+
+
+static void background_mode ()
+{
+    while (1) {
+	if (!cd_current_track () && !cd_is_paused ())
+	    random_track (1);
+	sleep (5);
+    }
 }
 
 
@@ -220,7 +235,9 @@ int main (int argc, char *argv[])
 	else if (option (arg, "b", "back"))
 	    back_track ();
 	else if (option (arg, "r", "random"))
-	    random_track ();
+	    random_track (0);
+	else if (option (arg, "B", "background"))
+	    background_mode ();
 	else {
 	    int i = atoi (arg);
 	    
@@ -253,4 +270,6 @@ int main (int argc, char *argv[])
  *  9 June 2000 - First version
  * 14 June 2000 - Fixed problem trying to play no-audio CDs
  *  4 Nov  2000 - "Forward" skipped first track if not already playing
+ * 29 Aug  2002 - Added "background" mode
+ *  1 Sep  2002 - Fixed an oops in background mode
  */
