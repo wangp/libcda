@@ -24,3 +24,10 @@ April 2000
 	api: can now use NULL in cd_get_tracks and cd_get_volume
 	api: added cd_error again, using OS error strings
 	--> released version 0.4
+
+November 2000
+
+19	linux: call cd_get_tracks before get_tocentry in cd_is_audio 
+		to refresh data
+	--> released version 0.5
+

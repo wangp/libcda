@@ -263,8 +263,8 @@ int cd_get_tracks(int *first, int *last)
 int cd_is_audio(int track)
 {
     struct cdrom_tocentry e;
-    
-    if (get_tocentry(track, &e) < 0)
+
+    if ((cd_get_tracks(0, 0) < 0) || (get_tocentry(track, &e) < 0))
 	return -1;
     return (e.cdte_ctrl & CDROM_DATA_TRACK) ? 0 : 1;
 }

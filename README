@@ -1,7 +1,7 @@
 
-			Libcda 0.4
+			   Libcda 0.5
 
-			09 April 2000
+			19 November 2000
 
 
    libcda is "A simple, cross-platform CD playing library".  It was
@@ -25,6 +25,11 @@
    *someone* contributes some code.  (I've already done versions for
    every compiler and platform I have access to, all within the space 
    of one and a bit days, so it's not very difficult... hint, hint)
+
+
+WHAT'S NEW IN 0.5
+
+   * little fix in Linux version
 
 
 WHAT'S NEW IN 0.4
