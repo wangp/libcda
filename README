@@ -1,7 +1,7 @@
 
-			Libcda 0.3 (alpha)
+			Libcda 0.4
 
-			27 January 2000
+			09 April 2000
 
 
    libcda is "A simple, cross-platform CD playing library".  It was
@@ -19,11 +19,18 @@
 	 Windows + Mingw32
 	 Windows + MSVC
 	 Windows + BCC
+	 BeOS + gcc (only i386 tested)
 
    Other platforms and compilers will be supported as soon as
    *someone* contributes some code.  (I've already done versions for
    every compiler and platform I have access to, all within the space 
    of one and a bit days, so it's not very difficult... hint, hint)
+
+
+WHAT'S NEW IN 0.4
+
+   * BeOS version
+   * cd_error variable
 
 
 COMPILING
@@ -50,8 +57,14 @@ COMPILING
 
    BCC / Windows (tested with v4.5):
 
-        In the IDE, create a new EasyWin project, and insert `windows.c'
-        and `example.c'.
+        In the IDE, create a new EasyWin project, and insert 
+	`windows.c' and `example.c'.
+
+   BeOS / gcc:
+
+	Type `make -f Makefile.Be' to make the example program.
+	
+	(If it compiles with CodeWarrior or runs on PPC, tell me!)
 
 
 FUNCTIONS
@@ -111,8 +124,8 @@ FUNCTIONS
    int cd_get_tracks(int *first, int *last)
 
      	Get first and last tracks of CD.  Returns zero on success.
-	Currently first and last must not be NULL (this may be
-	changed in future).
+	NULL may be used in place of a variable if you are not 
+	interested in the value.
 
    int cd_is_audio(int track)
 
@@ -122,7 +135,7 @@ FUNCTIONS
    void cd_get_volume(int *c0, int *c1)
 
      	Return volumes of left and right channels (0 - 255).  
-	c0 and c1 must not be NULL.
+	c0 and c1 may be NULL.
 
    void cd_set_volume(int c0, int c1)
 
@@ -135,6 +148,12 @@ FUNCTIONS
    void cd_close()
    
      	Close CD drive (if possible).
+
+   char *cd_error
+	
+	If one of the functions returns an error, this will 
+	point to an OS-dependant error string.  (Not yet
+	available on all platforms.)
 
 
 LICENCE
@@ -150,8 +169,9 @@ TODO / BUGS
 
    BCC: is trashy code
 	uses hack to get pause status
-	
-   all: stuff that is marked "may be changed in future".
+	needs cd_error
+
+   djgpp: needs cd_error
 
 
 CREDITS

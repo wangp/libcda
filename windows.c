@@ -15,6 +15,10 @@
 #include "libcda.h"
 
 
+static char _cd_error[256];
+const char *cd_error = _cd_error;
+
+
 /* Hack. */
 static int paused = 0;
 static char paused_pos[20];
@@ -36,9 +40,8 @@ static int command(char *fmt, ...)
     va_end(ap);
 
     err = mciSendString(buf, ret, sizeof ret, 0);
-    /* if (err) 
-	mciGetErrorString(err, error, sizeof error);
-     */
+    if (err) 
+	mciGetErrorString(err, _cd_error, sizeof _cd_error);
     return err ? -1 : 0;
 }
 
@@ -148,12 +151,17 @@ void cd_stop(void)
 
 int cd_get_tracks(int *first, int *last)
 {
+    int i;
+    
     if (command("status cdaudio number of tracks") != 0)
 	return -1;
 
-    *first = 1;
-    *last = atoi(ret);
-    return (*last != 0) ? 0 : -1;
+    i = atoi(ret);
+    
+    if (first) *first = 1;
+    if (last) *last = i;
+    
+    return (i) ? 0 : -1;
 }
 
 
@@ -167,7 +175,8 @@ int cd_is_audio(int track)
 
 void cd_get_volume(int *c0, int *c1)
 {
-    *c0 = *c1 = 128;	/* (shrug) */
+    if (c0) *c0 = 128;	/* (shrug) */
+    if (c1) *c1 = 128;
 }
 
 

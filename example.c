@@ -50,7 +50,7 @@ int main()
     int ret, trk, a, b;
 
     if (cd_init() < 0) {
-	printf("Error initialising libcda\n");
+	printf("Error initialising libcda (%s)\n", cd_error);
 	return 1;
     }
 	
@@ -70,7 +70,7 @@ int main()
 		trk = input_int("Track");
 		ret = cd_play(trk);
 		if (ret != 0)
-		    printf("Error occurred\n");
+		    printf("Error occurred (%s)\n", cd_error);
 		break;
 
 	    case 'r':
@@ -78,14 +78,14 @@ int main()
 		b = input_int("Last track");
 		ret = cd_play_range(a, b);
 		if (ret != 0)
-		    printf("Error occurred\n");
+		    printf("Error occurred (%s)\n", cd_error);
 		break;
 
 	    case 'f':
 		trk = input_int("Start track");
 		ret = cd_play_from(trk);
 		if (ret != 0)
-		    printf("Error occurred\n");
+		    printf("Error occurred (%s)\n", cd_error);
 		break;
 
 	    case 'P':
@@ -119,7 +119,7 @@ int main()
 	    case 'i':
 		ret = cd_get_tracks(&a, &b);
 		if (ret != 0)
-		    printf("Error occurred\n");
+		    printf("Error occurred (%s)\n", cd_error);
 		else
 		    printf("First track: %d\nLast track: %d\n", a, b);
 		break;
@@ -128,7 +128,7 @@ int main()
 		trk = input_int("Track");
 		ret = cd_is_audio(trk);
 		if (ret < 0)
-		     printf("Error occurred\n");
+		    printf("Error occurred (%s)\n", cd_error);
 		else
 		    printf("Track %d is %s\n", trk, (ret ? "audio" : "data"));
 		break;

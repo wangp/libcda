@@ -34,6 +34,10 @@ typedef struct {
 } Track;
 
 
+static char _cd_error[256] = "(error strings not available yet)";
+const char *cd_error = _cd_error;
+
+
 static int first_drive;
 static int lowest_track, highest_track;
 static Track *tracks;
@@ -400,8 +404,8 @@ int cd_get_tracks(int *first, int *last)
     if (!get_audio_info())
 	return -1;
 
-    *first = lowest_track;
-    *last = highest_track;
+    if (first) *first = lowest_track;
+    if (last)  *last  = highest_track;
     return 0;
 }
 
@@ -430,8 +434,8 @@ void cd_get_volume(int *c0, int *c1)
     v.control = 4;
     _ioctl(&ioctli, &v, sizeof v);
 
-    *c0 = v.volume0;
-    *c1 = v.volume1;
+    if (c0) *c0 = v.volume0;
+    if (c1) *c1 = v.volume1;
 }
 
 

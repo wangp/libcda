@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/cdrom.h>
+#include <errno.h>
 #include "libcda.h"
 
 
@@ -25,13 +26,29 @@
 
 static int fd = -1;
 
+static char _cd_error[256];
+const char *cd_error = _cd_error;
+
+
+static void copy_cd_error(void)
+{
+    strncpy(_cd_error, strerror(errno), sizeof _cd_error);
+    _cd_error[sizeof _cd_error - 1] = 0;
+}
+
 
 static int get_tocentry(int track, struct cdrom_tocentry *e)
 {
     memset(e, 0, sizeof(struct cdrom_tocentry));
     e->cdte_track = track;
     e->cdte_format = CDROM_MSF;
-    return ioctl(fd, CDROMREADTOCENTRY, e);
+    
+    if (ioctl(fd, CDROMREADTOCENTRY, e) < 0) {
+	copy_cd_error();
+	return -1;
+    }
+    
+    return 0;
 }
 
 
@@ -39,7 +56,12 @@ static int get_subchnl(struct cdrom_subchnl *s)
 {
     memset(s, 0, sizeof(struct cdrom_subchnl));
     s->cdsc_format = CDROM_MSF;
-    return ioctl(fd, CDROMSUBCHNL, s);
+    if (ioctl(fd, CDROMSUBCHNL, s) < 0) {
+	copy_cd_error();
+	return -1;
+    }
+   
+    return 0;
 }
 
 
@@ -56,7 +78,12 @@ int cd_init()
     if (fd != -1) close(fd);
 
     fd = open(device, O_RDONLY | O_NONBLOCK);
-    return (fd == -1) ? -1 : 0;
+    if (fd < 0) {
+	copy_cd_error();
+	return -1;
+    }
+	
+    return 0;
 }
 
 
@@ -100,14 +127,24 @@ static int play(int t1, int t2)
     msf.cdmsf_sec1 = e1.cdte_addr.msf.second;
     msf.cdmsf_frame1 = e1.cdte_addr.msf.frame;
     
-    return ioctl(fd, CDROMPLAYMSF, &msf);
+    if (ioctl(fd, CDROMPLAYMSF, &msf) < 0) {
+	copy_cd_error();
+	return -1;
+    }
+    
+    return 0;
 #else
     struct cdrom_ti idx;
 
     memset(&idx, 0, sizeof(idx));
     idx.cdti_trk0 = t1;
     idx.cdti_trk1 = t2;
-    return ioctl(fd, CDROMPLAYTRKIND, &idx);
+    if (ioctl(fd, CDROMPLAYTRKIND, &idx) < 0) {
+	copy_cd_error();
+	return -1;
+    }
+
+    return 0;
 #endif
 }
 
@@ -207,13 +244,14 @@ int cd_get_tracks(int *first, int *last)
     struct cdrom_tochdr toc;
 
     if (ioctl(fd, CDROMREADTOCHDR, &toc) < 0) {
+	copy_cd_error();
 	if (first) *first = 0;
 	if (last) *last = 0;
 	return -1;
     }
 
     if (first) *first = toc.cdth_trk0;
-    if (last) *last = toc.cdth_trk1;
+    if (last)  *last  = toc.cdth_trk1;
     return 0;
 }
 
@@ -240,8 +278,8 @@ void cd_get_volume(int *c0, int *c1)
     struct cdrom_volctrl vol;
 
     ioctl(fd, CDROMVOLREAD, &vol);
-    *c0 = vol.channel0;
-    *c1 = vol.channel1;
+    if (c0) *c0 = vol.channel0;
+    if (c1) *c1 = vol.channel1;
 }
 
 

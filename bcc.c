@@ -18,6 +18,10 @@
 #define MID(x,y,z)   MAX((x), MIN((y), (z)))
 
 
+static char _cd_error[256] = "(error strings not available yet)";
+const char *cd_error = _cd_error;
+
+
 #define CDROM 		0x21
 #define EJECT_TRAY 	0
 #define RESET		2
@@ -513,8 +517,8 @@ int cd_get_tracks(int *first, int *last)
 {
     if (!get_audio_info())
 	return -1;
-    *first = cdrom_data.low_audio;
-    *last = cdrom_data.high_audio;
+    if (first) *first = cdrom_data.low_audio;
+    if (last)  *last  = cdrom_data.high_audio;
     return 0;
 }
 
@@ -552,8 +556,8 @@ void cd_get_volume(int *c0, int *c1)
     vol.mode = 4;
     device_request(&tray_request);
 
-    *c0 = vol.volume0;
-    *c1 = vol.volume1;
+    if (c0) *c0 = vol.volume0;
+    if (c1) *c1 = vol.volume1;
 }
 
 

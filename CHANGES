@@ -18,3 +18,9 @@ January 2000
 	linux: now uses CDROMPLAYMSF for more compatibility
 	--> released version 0.3
 	
+April 2000
+
+09	beos: implemented BeOS version
+	api: can now use NULL in cd_get_tracks and cd_get_volume
+	api: added cd_error again, using OS error strings
+	--> released version 0.4
