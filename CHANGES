@@ -1,0 +1,6 @@
+January 2000
+
+26	Initial release; version 0.1 (a little early :)
+	djgpp: Implemented proper cd_get_volume
+	djgpp: cd_stop now stops for real, not pause
+	linux: cd_resume won't print crap if not paused

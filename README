@@ -1,0 +1,106 @@
+
+		Libcda 0.2 (alpha)
+
+		26 January 2000
+
+
+   libcda is "A simple, cross-platform CD playing library".  It was
+   designed to be used in computer games, but obviously this is not
+   necessary.
+
+   It also has the forgettable name that is mandatory for all CD audio
+   playing libraries.
+
+   It currently supports:
+	 Linux + gcc (only i386 tested)
+	 DOS + djgpp
+	
+   Windows and other platforms will be supported as soon as
+   *someone* contributes some code.
+
+
+FUNCTIONS
+
+   Lifted straight from the source code; sorry!  Please see `example.c' 
+   for proper usage and `libcda.h' for function prototypes.
+
+   cd_init:
+     Initialise library.  Return zero on success.
+     You must do this.
+
+   cd_exit:
+     Shutdown.  You must call this at the end of the program.
+   
+   cd_play:
+     Play specified track.  Return zero on success.
+   
+   cd_play_range:
+     Play from START to END tracks.  Return zero on success.
+   
+   cd_play_from:
+     Play from track to end of disc.
+     Return zero on success.
+   
+   cd_current_track:
+     Return track currently in playback, or zero if stopped.
+   
+   cd_pause:
+     Pause playback.
+   
+   cd_resume:
+     Resume playback.
+   
+   cd_is_paused:
+     Return non-zero if playback is paused.
+   
+   cd_stop:
+     Stop playback.
+   
+   cd_get_tracks:
+     Get first and last tracks of CD.
+     Return zero on success.
+   
+   cd_is_audio:
+     Return 1 if track specified is audio,
+     zero if it is data, -1 if an error occurs.
+   
+   cd_get_volume:
+     Return volumes of left and right channels.
+   
+   cd_set_volume:
+     Set left and right channel volumes (0 - 255).
+   
+   cd_eject:
+     Eject CD drive (if possible).
+   
+   cd_close:
+     Close CD drive (if possible).
+
+
+   The API is deliberately designed to be simple, omitting functions
+   for querying track times, etc.  If you can provide implementations
+   of a function you would like for ALL supported platforms, then I
+   will include it.
+   
+
+LICENCE
+
+   See COPYING.
+
+
+TODO / BUGS
+
+   Windows implementation.
+
+
+CREDITS
+
+   libcda was written by Peter Wang, in part using:
+
+	 BCD v1.3 by Brennan Underwood (see bcd.doc).
+
+
+   Email: 	tjaden@psynet.net
+
+   WWW:   	http://www.psynet.net/tjaden/
+
