@@ -1,0 +1,64 @@
+.\" Man page for cda
+.\"
+.TH cda 1 "March 11, 2001"
+.SH NAME
+cda \- a command-line CD player
+
+.SH SYNOPSIS
+\fBcda\fP [ \fIcommand\fP | \fItrack\fP ]
+
+.SH DESCRIPTION
+.B cda
+controls CD-ROM drives to play audio CDs.  It is designed to get you playing
+music with a minimum of effort.
+
+.SH COMMANDS
+.TP
+.B d, dir
+Lists the CD directory.
+.TP
+.B e, eject
+Opens the CD tray.
+.TP
+.B c, close
+Closes the CD tray.
+.TP
+.B h, help
+Shows list of commands.
+.TP
+.B i, info
+Shows minimal information on current CD.
+.TP
+.B p, pause
+Pause playback.
+.TP
+.B s, stop
+Stop playback.
+.TP
+.B v, version
+Display
+.B cda
+version information.
+.TP
+.B f, forward
+Play the next track on the CD.
+.TP
+.B b, backward
+Play the previous track on the CD.
+.TP
+.B r, random
+Play a random track on the CD.
+
+.SH ENVIRONMENT
+.TP
+.B CDAUDIO
+If
+.B CDAUDIO
+is set, its value will be used as the CDROM device name.  The default is
+"/dev/cdrom".
+
+.SH TIP
+Running
+.I cda
+without any command-line arguments will begin playing from the first track.
+
