@@ -31,3 +31,7 @@ November 2000
 		to refresh data
 	--> released version 0.5
 
+April 2001
+
+17	api: forgot to increment version number in header
+	--> rereleased version 0.5

@@ -12,8 +12,8 @@ extern "C" {
 
 
 /* High-byte is major version, low-byte is minor. */
-#define LIBCDA_VERSION		0x0004
-#define LIBCDA_VERSION_STR	"0.4"
+#define LIBCDA_VERSION		0x0005
+#define LIBCDA_VERSION_STR	"0.5"
 
 
 extern const char *cd_error;
