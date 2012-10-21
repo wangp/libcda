@@ -45,3 +45,4 @@ October 2012
 
 21	create git repository from archives
 	delete COPYING clause about not distributing cut-down versions
+	--> release version 0.5.1
