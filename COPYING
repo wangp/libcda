@@ -48,9 +48,4 @@ The following licence covers these files ONLY: djgpp.c, bcd.doc
 (The author of the licence is Brennan Underwood.)
 
 
-If necessary, you may remove the BCD-derived files when including the
-libcda package _as part of your source tree_.  Do not distribute
-libcda as a standalone package with files missing.
-
-
 
